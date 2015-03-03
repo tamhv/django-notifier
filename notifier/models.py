@@ -1,5 +1,5 @@
 ###############################################################################
-## Imports
+# Imports
 ###############################################################################
 # Python
 from collections import Iterable
@@ -20,9 +20,10 @@ from notifier import managers
 
 
 ###############################################################################
-## Models
+# Models
 ###############################################################################
 class BaseModel(models.Model):
+
     """Abstract base class with auto-populated created and updated fields. """
     created = models.DateTimeField(default=now, db_index=True)
     updated = models.DateTimeField(default=now, db_index=True)
@@ -36,6 +37,7 @@ class BaseModel(models.Model):
 
 
 class Backend(BaseModel):
+
     """
     Entries for various delivery backends (SMS, Email)
     """
@@ -49,9 +51,12 @@ class Backend(BaseModel):
 
     # The klass value defines the class to be used to send the notification.
     klass = models.CharField(max_length=500,
-        help_text='Example: notifier.backends.EmailBackend')
+                             help_text='Example: notifier.backends.EmailBackend')
 
     def __unicode__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
     def _get_backendclass(self):
@@ -73,12 +78,13 @@ class Backend(BaseModel):
         sent_success = backendobject.send(user, context)
 
         SentNotification.objects.create(user=user, notification=notification,
-            backend=self, success=sent_success)
+                                        backend=self, success=sent_success)
 
         return sent_success
 
 
 class Notification(BaseModel):
+
     """
     Entries for various notifications
     """
@@ -104,11 +110,15 @@ class Notification(BaseModel):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
     def check_perms(self, user):
         # Need an iterable with permission strings to check using has_perms.
         # This makes it possible to take advantage of the cache.
         perm_list = set(
-            ["%s.%s" % (p.content_type.app_label, p.codename) for p in self.permissions.select_related()]
+            ["%s.%s" % (p.content_type.app_label, p.codename)
+             for p in self.permissions.select_related()]
         )
 
         if not user.has_perms(perm_list):
@@ -227,6 +237,7 @@ class Notification(BaseModel):
 
 
 class GroupPrefs(BaseModel):
+
     """
     Per group notification settings
 
@@ -243,8 +254,12 @@ class GroupPrefs(BaseModel):
     def __unicode__(self):
         return '%s:%s:%s' % (self.group, self.notification, self.backend)
 
+    def __str__(self):
+        return self.__unicode__()
+
 
 class UserPrefs(BaseModel):
+
     """
     Per user notification settings
 
@@ -264,6 +279,9 @@ class UserPrefs(BaseModel):
     def __unicode__(self):
         return '%s:%s:%s' % (self.user, self.notification, self.backend)
 
+    def __str__(self):
+        return self.__unicode__()
+
     def save(self, *args, **kwargs):
         if not self.notification.check_perms(self.user):
             raise PermissionDenied
@@ -271,6 +289,7 @@ class UserPrefs(BaseModel):
 
 
 class SentNotification(BaseModel):
+
     """
     Record of every notification sent.
     """
@@ -283,12 +302,15 @@ class SentNotification(BaseModel):
     def __unicode__(self):
         return '%s:%s:%s' % (self.user, self.notification, self.backend)
 
+    def __str__(self):
+        return self.__unicode__()
+
 
 ###############################################################################
-## Signal Recievers
+# Signal Recievers
 ###############################################################################
 @receiver(pre_delete, sender=Backend,
-    dispatch_uid='notifier.models.backend_pre_delete')
+          dispatch_uid='notifier.models.backend_pre_delete')
 def backend_pre_delete(sender, instance, **kwargs):
     raise PermissionDenied(
         'Cannot delete backend %s. Remove from settings.' % instance.name)

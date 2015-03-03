@@ -1,5 +1,5 @@
 ###############################################################################
-## Imports
+# Imports
 ###############################################################################
 # Python
 from smtplib import SMTPException
@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 
 
 ###############################################################################
-## Code
+# Code
 ###############################################################################
 class BaseBackend(object):
     # Name of backend method associated with this class
@@ -22,7 +22,8 @@ class BaseBackend(object):
 
     def __init__(self, notification, *args, **kwargs):
         self.notification = notification
-        self.template = ('/notifier/%s_%s.txt' % (notification.name, self.name))
+        self.template = ('/notifier/%s_%s.txt' %
+                         (notification.name, self.name))
 
     # Define how to send the notification
     def send(self, user, context=None):
@@ -33,7 +34,7 @@ class BaseBackend(object):
 
         self.context.update({
             'user': user,
-            'site': Site.objects.get_current()
+            'site': Site.objects.get_current() if settings.SITE_ID else None
         })
 
 
@@ -61,7 +62,7 @@ class EmailBackend(BaseBackend):
 
         try:
             send_mail(subject, message, settings.DEFAULT_FROM_EMAIL,
-                [user.email])
+                      [user.email])
         except SMTPException:
             return False
         else:
