@@ -30,11 +30,11 @@ Setup
 
     ::
 
-        INSTALLED_APPS = (
-            ...
-            'notifier',
-            ...
-        )
+	INSTALLED_APPS = (
+	    ...
+	    'notifier',
+	    ...
+	)
 
 2. Settings
 
@@ -42,20 +42,22 @@ Setup
 
     ::
 
-        NOTIFIER_BACKENDS = (
-            'notifier.backends.EmailBackend',
-            'path.to.custom.backend.CustomBackend',
-        )
+	NOTIFIER_BACKENDS = (
+	    'notifier.backends.EmailBackend',
+	    'path.to.custom.backend.CustomBackend',
+	)
 
 
 3. Run ``syncdb`` or ``migrate`` (if using South) to create the necessary tables in the database.
-    
+
     ::
 
-        $ python manage.py syndb
+	$ python manage.py syndb
 
     If using South:
 
     ::
 
-        $ python manage.py migrate
+	$ python manage.py migrate
+
+4. Create a Notification Preferences for the User/Group before trying to send a notification. Notifications don't work if preferances are not set.
