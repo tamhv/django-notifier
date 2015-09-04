@@ -296,7 +296,7 @@ class SentNotification(BaseModel):
     user = models.ForeignKey(User)
     notification = models.ForeignKey(Notification)
     backend = models.ForeignKey(Backend)
-    success = models.BooleanField()
+    success = models.BooleanField(default=False)
     read = models.BooleanField(default=False)
 
     def __unicode__(self):
