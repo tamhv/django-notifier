@@ -53,7 +53,7 @@ class EmailBackend(BaseBackend):
             'notifier/%s/%s_text_message.txt' % (notification.name, self.name)
         )
         self.template_html_message = (
-            'notifier/%s/%s_html_message.txt' % (notification.name, self.name)
+            'notifier/%s/%s_html_message.html' % (notification.name, self.name)
         )
 
     def send(self, user, context=None):
