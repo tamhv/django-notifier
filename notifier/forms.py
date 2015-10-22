@@ -58,8 +58,11 @@ class NotifierFormSet(BaseFormSet):
         self.extra = 0
         self.can_order = False
         self.can_delete = False
+        self.min_num = 0  # Required for >=Dj1.4.5
         self.max_num = 100  # Required for >=Dj1.4.5
         self.absolute_max = 100  # Required for >=Dj1.4.5
+        self.validate_min = 0
+        self.validate_max = 100
 
         super(NotifierFormSet, self).__init__(data, files, **kwargs)
 
