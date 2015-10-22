@@ -69,7 +69,37 @@ class EmailBackend(BaseBackend):
         try:
             send_mail(subject=subject, message=text_message,
                       from_email=settings.DEFAULT_FROM_EMAIL,
-                      reciepent_list=[user.email, ],
+                      recipient_list=[user.email, ],
+                      html_message=html_message)
+        except SMTPException:
+            return False
+        else:
+            return True
+
+    def send_anonymous(self, to, context=None):
+        """
+        Send en email to just an email address.
+        """
+        if not context:
+            self.context = {}
+        else:
+            self.context = context
+            self.context.update({
+                'site': Site.objects.get_current()
+                if settings.SITE_ID else None
+            })
+
+        subject = render_to_string(self.template_subject, self.context)
+        subject = ''.join(subject.splitlines())
+        text_message = render_to_string(self.template_text_message,
+                                        self.context)
+        html_message = render_to_string(self.template_html_message,
+                                        self.context)
+
+        try:
+            send_mail(subject=subject, message=text_message,
+                      from_email=settings.DEFAULT_FROM_EMAIL,
+                      recipient_list=[to, ],
                       html_message=html_message)
         except SMTPException:
             return False
