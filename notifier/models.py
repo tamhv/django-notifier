@@ -82,6 +82,22 @@ class Backend(BaseModel):
 
         return sent_success
 
+    def send_anonymous(self, user, notification, context=None):
+        """
+        Send the notification to the specified user using this backend.
+        Anonymous because we don't have a user object.
+
+        returns Boolean according to success of delivery.
+        """
+
+        backendobject = self.backendclass(notification)
+        sent_success = backendobject.send_anonymous(user, context)
+
+        SentNotification.objects.create(to=user, notification=notification,
+                                        backend=self, success=sent_success)
+
+        return sent_success
+
 
 class Notification(BaseModel):
 
@@ -232,8 +248,16 @@ class Notification(BaseModel):
             users = [users]
 
         for user in users:
-            for backend in self.get_backends(user):
-                backend.send(user, self, context)
+            # check if user object
+            if isinstance(user, User):
+                for backend in self.get_backends(user):
+                    backend.send(user, self, context)
+            # check for anonymous email address
+            # bypass checks for preferences
+            # each backend is responsible for handling the email
+            elif isinstance(user, unicode):
+                for backend in Backend.objects.filter(enabled=True):
+                    backend.send_anonymous(user, self, context)
 
 
 class GroupPrefs(BaseModel):
@@ -292,8 +316,10 @@ class SentNotification(BaseModel):
 
     """
     Record of every notification sent.
+    Either user or to should be filled in.
     """
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, null=True, blank=True)
+    to = models.CharField(max_length=255, null=True, blank=True)
     notification = models.ForeignKey(Notification)
     backend = models.ForeignKey(Backend)
     success = models.BooleanField(default=False)
