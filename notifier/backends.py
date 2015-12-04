@@ -10,6 +10,8 @@ from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
+from pynliner import Pynliner
+
 
 ###############################################################################
 # Code
@@ -63,8 +65,9 @@ class EmailBackend(BaseBackend):
         subject = ''.join(subject.splitlines())
         text_message = render_to_string(self.template_text_message,
                                         self.context)
-        html_message = render_to_string(self.template_html_message,
-                                        self.context)
+        html_message = Pynliner().from_string(
+            render_to_string(self.template_html_message,
+                             self.context)).run()
 
         try:
             send_mail(subject=subject, message=text_message,
@@ -93,8 +96,9 @@ class EmailBackend(BaseBackend):
         subject = ''.join(subject.splitlines())
         text_message = render_to_string(self.template_text_message,
                                         self.context)
-        html_message = render_to_string(self.template_html_message,
-                                        self.context)
+        html_message = Pynliner().from_string(
+            render_to_string(self.template_html_message,
+                             self.context)).run()
 
         try:
             send_mail(subject=subject, message=text_message,
