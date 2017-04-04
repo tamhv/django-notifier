@@ -6,8 +6,9 @@ from collections import Iterable
 from importlib import import_module
 
 # Django
-from django.contrib.auth.models import User, Group, Permission
-from django.core.cache import cache
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.db.models import Q
@@ -249,7 +250,7 @@ class Notification(BaseModel):
 
         for user in users:
             # check if user object
-            if isinstance(user, User):
+            if isinstance(user, get_user_model()):
                 for backend in self.get_backends(user):
                     backend.send(user, self, context)
             # check for anonymous email address
@@ -290,7 +291,7 @@ class UserPrefs(BaseModel):
     Supercedes group setting.
     If notification preference is not explicitly set, then use group setting.
     """
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
     notification = models.ForeignKey(Notification)
     backend = models.ForeignKey(Backend)
     notify = models.BooleanField(default=True)
@@ -318,7 +319,7 @@ class SentNotification(BaseModel):
     Record of every notification sent.
     Either user or to should be filled in.
     """
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
     to = models.CharField(max_length=255, null=True, blank=True)
     notification = models.ForeignKey(Notification)
     backend = models.ForeignKey(Backend)

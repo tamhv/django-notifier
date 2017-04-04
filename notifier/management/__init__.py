@@ -1,3 +1,4 @@
+
 ###############################################################################
 ## Imports
 ###############################################################################
@@ -6,7 +7,7 @@ from importlib import import_module
 
 # Django
 from django.conf import settings
-from django.db.models.signals import post_syncdb
+from django.db.models.signals import post_migrate
 
 # External
 try:
@@ -75,12 +76,12 @@ if South:
         dispatch_uid="notifier.management.create_notifications",
     )
 else:
-    post_syncdb.connect(
+    post_migrate.connect(
         create_backends,
         dispatch_uid="notifier.management.create_backends",
         sender=notifier.models
     )
-    post_syncdb.connect(
+    post_migrate.connect(
         create_notifications,
         dispatch_uid="notifier.management.create_notifications",
         sender=notifier.models
