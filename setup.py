@@ -26,6 +26,6 @@ setup(
     ],
     install_requires=[
         "Django >= 1.4.0",
-        "pynliner==0.5.2",
+        "pynliner==0.8.0",
     ],
 )
