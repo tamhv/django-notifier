@@ -14,7 +14,6 @@ from notifier import models
 class BackendAdmin(admin.ModelAdmin):
     list_display = ('display_name', 'enabled')
     readonly_fields = ('name', 'display_name', 'description', 'klass')
-    list_editable = ('enabled',)
     list_filter = ('enabled', 'display_name')
 admin.site.register(models.Backend, BackendAdmin)
 
@@ -28,7 +27,6 @@ admin.site.register(models.Notification, NotificationAdmin)
 
 class GroupPrefsAdmin(admin.ModelAdmin):
     list_display = ('group', 'notification', 'backend', 'notify')
-    list_editable = ('notify',)
     list_filter = ('notify', 'backend', 'notification')
 admin.site.register(models.GroupPrefs, GroupPrefsAdmin)
 
