@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.contrib.auth.models import Permission
 from django.core import mail
+from django.contrib.auth import get_user_model
 
 # User
 from notifier import shortcuts, models
@@ -42,8 +43,9 @@ class PreferencesTests(TestCase):
         self.test2_notification.backends.add(
             self.email_backend)
 
-        self.user1 = User.objects.create(
-            username='user1',
+        self.user1 = get_user_model().objects.create_user(
+            first_name='user1',
+            last_name='test',
             email='user1@example.com'
         )
 
@@ -94,8 +96,9 @@ class PermissionTests(TestCase):
     """Tests related to permission checking for notifications."""
 
     def setUp(self):
-        self.user1 = User.objects.create(
-            username='user1',
+        self.user1 = get_user_model().objects.create_user(
+            first_name='user1',
+            last_name='test',
             email='user1@example.com'
         )
 
@@ -126,13 +129,13 @@ class PermissionTests(TestCase):
 
         self.user1.user_permissions.add(self.permission1)
         # Django caches permissions on user, so refetch user from the database
-        self.user1 = User.objects.get(pk=self.user1.pk)
+        self.user1 = get_user_model().objects.get(pk=self.user1.pk)
         self.assertEqual(self.test1_notification.check_perms(self.user1),
             False, msg='Permission check Failed')
 
         self.user1.user_permissions.add(self.permission2)
         # Django caches permissions on user, so refetch user from the database
-        self.user1 = User.objects.get(pk=self.user1.pk)
+        self.user1 = get_user_model().objects.get(pk=self.user1.pk)
         self.assertEqual(self.test1_notification.check_perms(self.user1),
             True, msg='Permission check Failed')
 
@@ -168,8 +171,9 @@ class UtilityFunctionTests(TestCase):
 
 class EmailTests(TestCase):
     def setUp(self):
-        self.user1 = User.objects.create(
-            username='user1',
+        self.user1 = get_user_model().objects.create_user(
+            first_name='user1',
+            last_name='test',
             email='user1@example.com'
         )
 

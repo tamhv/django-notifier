@@ -5,7 +5,8 @@
 from collections import Iterable
 
 # Django
-from django.contrib.auth.models import Group, Permission, User
+from django.contrib.auth.models import Group, Permission
+from django.contrib.auth import get_user_model
 from django.db.models.query import QuerySet
 
 # User
@@ -95,7 +96,7 @@ def update_preferences(name, user, prefs_dict):
     """
     notification = Notification.objects.get(name=name)
 
-    if isinstance(user, User):
+    if isinstance(user, get_user_model()):
         return notification.update_user_prefs(user, prefs_dict)
     elif isinstance(user, Group):
         return notification.update_group_prefs(user, prefs_dict)
@@ -120,10 +121,10 @@ def _get_permission_queryset(permissions):
         if isinstance(permissions, Permission):
             permissions = [permissions]
         else:
-            if isinstance(permissions, basestring):
+            if isinstance(permissions, str):
                 permissions = [permissions]
             elif isinstance(permissions, Iterable):
-                if not all(isinstance(x, basestring) for x in permissions):
+                if not all(isinstance(x, str) for x in permissions):
                     raise TypeError
             else:
                 raise TypeError
@@ -138,10 +139,10 @@ def _get_backend_queryset(backends):
         if isinstance(backends, Backend):
             backends = [backends]
         else:
-            if isinstance(backends, basestring):
+            if isinstance(backends, str):
                 backends = [backends]
             elif isinstance(backends, Iterable):
-                if not all(isinstance(x, basestring) for x in backends):
+                if not all(isinstance(x, str) for x in backends):
                     raise TypeError
             else:
                 raise TypeError
