@@ -10,11 +10,11 @@ from django.conf import settings
 from django.db.models.signals import post_migrate
 
 # External
-try:
-    from south.signals import post_migrate
-    South = True
-except ImportError:
-    South = False
+# try:
+#     from south.signals import post_migrate
+#     South = True
+# except ImportError:
+#     South = False
 
 # User
 import notifier
@@ -25,7 +25,7 @@ from notifier import settings as notifier_settings
 ###############################################################################
 ## Code
 ###############################################################################
-def create_backends(app, **kwargs):
+def create_backends(sender, **kwargs):
     """
     Creates/Updates Backend objects based on NOTIFIER_BACKENDS settings.
 
@@ -33,8 +33,8 @@ def create_backends(app, **kwargs):
     not suppossed to be modified by user. They will be over-written on restart.
     """
 
-    if South and not app == 'notifier':
-        return
+    # if South and not app == 'notifier':
+    #     return
 
     for klass in notifier_settings.BACKEND_CLASSES:
         try:
@@ -50,14 +50,14 @@ def create_backends(app, **kwargs):
             backend.save()
 
 
-def create_notifications(app, **kwargs):
+def create_notifications(sender, **kwargs):
     """
     Creates all the notifications specified in notifiers.py for all apps
     in INSTALLED_APPS
     """
 
-    if South and not app == 'notifier':
-        return
+    # if South and not app == 'notifier':
+    #     return
 
     for installed_app in settings.INSTALLED_APPS:
         try:
@@ -66,23 +66,23 @@ def create_notifications(app, **kwargs):
             pass
 
 
-if South:
-    post_migrate.connect(
-        create_backends,
-        dispatch_uid="notifier.management.create_backends"
-    )
-    post_migrate.connect(
-        create_notifications,
-        dispatch_uid="notifier.management.create_notifications",
-    )
-else:
-    post_migrate.connect(
-        create_backends,
-        dispatch_uid="notifier.management.create_backends",
-        sender=notifier.models
-    )
-    post_migrate.connect(
-        create_notifications,
-        dispatch_uid="notifier.management.create_notifications",
-        sender=notifier.models
-    )
+# if South:
+#     post_migrate.connect(
+#         create_backends,
+#         dispatch_uid="notifier.management.create_backends"
+#     )
+#     post_migrate.connect(
+#         create_notifications,
+#         dispatch_uid="notifier.management.create_notifications",
+#     )
+# else:
+#     post_migrate.connect(
+#         create_backends,
+#         dispatch_uid="notifier.management.create_backends",
+#         sender=notifier.models
+#     )
+#     post_migrate.connect(
+#         create_notifications,
+#         dispatch_uid="notifier.management.create_notifications",
+#         sender=notifier.models
+#     )
