@@ -24,7 +24,6 @@ from notifier import managers
 # Models
 ###############################################################################
 class BaseModel(models.Model):
-
     """Abstract base class with auto-populated created and updated fields. """
     created = models.DateTimeField(default=now, db_index=True)
     updated = models.DateTimeField(default=now, db_index=True)
@@ -38,7 +37,6 @@ class BaseModel(models.Model):
 
 
 class Backend(BaseModel):
-
     """
     Entries for various delivery backends (SMS, Email)
     """
@@ -66,6 +64,7 @@ class Backend(BaseModel):
         """
         module, klass = self.klass.rsplit('.', 1)
         return getattr(import_module(module), klass)
+
     backendclass = property(_get_backendclass)
 
     def send(self, user, notification, context=None):
@@ -101,7 +100,6 @@ class Backend(BaseModel):
 
 
 class Notification(BaseModel):
-
     """
     Entries for various notifications
     """
@@ -149,7 +147,8 @@ class Notification(BaseModel):
         """
         user_settings = self.userprefs_set.filter(user=user)
         group_filter = Q()
-        for group in user.groups.all():
+        groups = user.groups.all()
+        for group in groups:
             group_filter = Q(group_filter | Q(group=group))
 
         group_settings = self.groupprefs_set.filter(group_filter)
@@ -161,9 +160,8 @@ class Notification(BaseModel):
             try:
                 userprefs = user_settings.get(backend=backend)
             except UserPrefs.DoesNotExist:
-                try:
-                    group_settings.get(backend=backend, notify=True)
-                except GroupPrefs.DoesNotExist:
+                r = group_settings.filter(backend=backend, notify=True).first()
+                if r is None:
                     remove_backends.append(backend.id)
             else:
                 if not userprefs.notify:
@@ -251,18 +249,19 @@ class Notification(BaseModel):
         for user in users:
             # check if user object
             if isinstance(user, get_user_model()):
-                for backend in self.get_backends(user):
+                backends = self.get_backends(user)
+                for backend in backends:
                     backend.send(user, self, context)
             # check for anonymous email address
             # bypass checks for preferences
             # each backend is responsible for handling the email
             elif isinstance(user, unicode):
-                for backend in Backend.objects.filter(enabled=True):
+                backends = Backend.objects.filter(enabled=True)
+                for backend in backends:
                     backend.send_anonymous(user, self, context)
 
 
 class GroupPrefs(BaseModel):
-
     """
     Per group notification settings
 
@@ -284,7 +283,6 @@ class GroupPrefs(BaseModel):
 
 
 class UserPrefs(BaseModel):
-
     """
     Per user notification settings
 
@@ -314,7 +312,6 @@ class UserPrefs(BaseModel):
 
 
 class SentNotification(BaseModel):
-
     """
     Record of every notification sent.
     Either user or to should be filled in.
